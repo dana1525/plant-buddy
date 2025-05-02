@@ -2,7 +2,7 @@ import { useState } from "react";
 import { addPlant } from "../services/plantService";
 import { auth } from "../firebase/config"
 import { addDoc, collection } from "firebase/firestore";
-import { db } from "../firebase/config";
+import { db } from "../firebase/config"; 
 import { initializePlantSensors } from "../services/sensorService";
 
 export default function AddPlantForm({ onPlantAdded }){
