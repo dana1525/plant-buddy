@@ -33,10 +33,77 @@
   }
 }
 
-.card {
-  padding: 2em;
+/* Stil listă plante */
+.plant-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  padding: 0;
+  margin-top: 2rem;
+  list-style: none;
 }
 
-.read-the-docs {
-  color: #888;
+/* Card individual */
+.plant-card {
+  background-color: #2b2b2b;
+  color: #e0e0e0;
+  border: 1px solid #3a3a3a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 260px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.plant-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* Butoane din card */
+.card-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.card-buttons button {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #444;
+  color: #eee;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.card-buttons button:hover {
+  background-color: #666;
+}
+
+/* Inputuri de edit */
+.plant-card input {
+  width: 100%;
+  padding: 0.4rem;
+  background: #1e1e1e;
+  border: 1px solid #555;
+  border-radius: 6px;
+  color: #ddd;
+}
+
+.status-warning {
+  border-color: #facc15; /* galben - avertisment */
+}
+
+.status-danger {
+  border-color: #ef4444; /* roșu - grav */
+}
+
+.status-okay {
+  border-color: #10b981; /* verde - sănătoasă */
 }

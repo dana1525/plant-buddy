@@ -10,6 +10,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PlantChart from "./PlantChart";
 import { editPlant } from "../services/plantService";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function Dashboard(){
     // const navigate = useNavigate();
@@ -19,6 +20,22 @@ export default function Dashboard(){
     const [editingPlantId, setEditingPlantId] = useState(null);
     const [editedName, setEditedName] = useState("");
     const [editedType, setEditedType] = useState("");
+
+    const getStatusClass = (status) => {
+        switch(status){
+            case "Needs Water":
+            case "Overwatered":
+            case "Needs More Light":
+            case "Too Much Light":
+                return "status-warning";
+            case "Too Cold":
+            case "Too Hot":
+                return "status-danger";
+            case "Healthy":
+            default:
+                return "status-okay";
+        }
+    };
 
     const fetchPlants = async() => {
         const user = auth.currentUser;
@@ -56,13 +73,18 @@ export default function Dashboard(){
     };
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            const user = auth.currentUser;
-            if(user) updateAllPlantSensors(user.uid);
-        }, 60000);
-        return() => clearInterval(interval);
-    }, []);
+       const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+            updateAllPlantSensors(user.uid);
+            const interval = setInterval(() => {
+                updateAllPlantSensors(user.uid);
+            }, 2000);
 
+            return () => clearInterval(interval);
+        }
+    });
+    return () => unsubscribe();
+    }, []);
 
     return(
         <div>
@@ -70,46 +92,44 @@ export default function Dashboard(){
             <AddPlantForm onPlantAdded={fetchPlants} />
             {plants.length === 0 ?
                 (<p>No plants yet! Add one above!</p>) : 
-                (<ul>
-                    {plants.map((plant) => (
-                    <li key={plant.id}>
-                        <strong>{plant.name}</strong> - {plant.type} - Status: {plant.status}
-                        <small>
-                             {" "}- Last Update:{" "}
-                                {
-                                    plant.lastUpdated ? new Date(plant.lastUpdated.seconds * 1000).toLocaleString() : "N/A"
-                                }
-                        </small>
-                        <button onClick={() => handleDelete(plant.id)} className="button-delete">Delete</button>
-                        {editingPlantId === plant.id ? (
-                            <>
-                                <input value={editedName} onChange={(e) => setEditedName(e.target.value)} />
-                                <input value={editedType} onChange={(e) => setEditedType(e.target.value)} />
-                                <button onClick={() => saveEdit(plant.id)}>Save</button>
-                                <button onClick={() => setEditingPlantId(null)}>Cancel</button>
-                            </>
-                            ) : (
-                            <>
-                                <button
-                                onClick={() => {
-                                    setEditingPlantId(plant.id);
-                                    setEditedName(plant.name);
-                                    setEditedType(plant.type);
-                                }}
-                                className="button-edit"
-                                >
-                                Edit
-                                </button>
-                                <button onClick={() => handleDelete(plant.id)} className="button-delete">
-                                Delete
-                                </button>
-                            </>
-                            )}
+                <ul className="plant-list">
+  {plants.map((plant) => (
+    <li key={plant.id} className={`plant-card ${getStatusClass(plant.status)}`}>
+      <strong>{plant.name}</strong> - {plant.type}
+      <div>Status: <b>{plant.status}</b></div>
+      <small>
+        Last Update:{" "}
+        {plant.lastUpdated
+          ? new Date(plant.lastUpdated.seconds * 1000).toLocaleString()
+          : "N/A"}
+      </small>
+      <div className="buttons">
+        <button onClick={() => handleDelete(plant.id)} className="button-delete">Delete</button>
+        {editingPlantId === plant.id ? (
+          <>
+            <input value={editedName} onChange={(e) => setEditedName(e.target.value)} />
+            <input value={editedType} onChange={(e) => setEditedType(e.target.value)} />
+            <button onClick={() => saveEdit(plant.id)}>Save</button>
+            <button onClick={() => setEditingPlantId(null)}>Cancel</button>
+          </>
+        ) : (
+          <button
+            onClick={() => {
+              setEditingPlantId(plant.id);
+              setEditedName(plant.name);
+              setEditedType(plant.type);
+            }}
+            className="button-edit"
+          >
+            Edit
+          </button>
+        )}
+      </div>
+    </li>
+  ))}
+</ul>
 
-                        {/* <PlantChart plantId={plant.id} /> */}
-                    </li>
-                    ))}
-                </ul>)
+
             }
         </div>
     );

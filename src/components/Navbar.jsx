@@ -28,13 +28,8 @@ export default function Navbar() {
         <nav>
             <h1>Plant Buddy 🌿</h1>
             <div>
-                {user? (
+                {user && (
                     <button onClick={handleLogout}>Logout</button>
-                ) : (
-                    <>
-                    {/* <button onClick={() => navigate("/login")}>Login</button> */}
-                    {/* <button onClick={() => navigate("/register")}>Register</button> */}
-                    </>
                 )}
             </div>
         </nav>
