@@ -10,9 +10,9 @@ Allows user authentication, plant data management, and sensor data simulation (w
 - [x] User registration & login using Firebase Authentication
 - [ ] User management and session handling
 - [ ] Responsive and intuitive interface (Tailwind CSS)
-- [ ] Simulated sensor readings (moisture, temperature, etc.)
-- [ ] Plant management (add/view/remove)
-- [ ] Data storage with Firebase Firestore
+- [x] Simulated sensor readings (moisture, temperature, etc.)
+- [x] Plant management (add/view/remove)
+- [x] Data storage with Firebase Firestore
 - [ ] Real-time alerts and notifications *(planned)*
 - [ ] Sensor hardware integration *(planned)*
 
