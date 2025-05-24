@@ -93,43 +93,41 @@ export default function Dashboard(){
             {plants.length === 0 ?
                 (<p>No plants yet! Add one above!</p>) : 
                 <ul className="plant-list">
-  {plants.map((plant) => (
-    <li key={plant.id} className={`plant-card ${getStatusClass(plant.status)}`}>
-      <strong>{plant.name}</strong> - {plant.type}
-      <div>Status: <b>{plant.status}</b></div>
-      <small>
-        Last Update:{" "}
-        {plant.lastUpdated
-          ? new Date(plant.lastUpdated.seconds * 1000).toLocaleString()
-          : "N/A"}
-      </small>
-      <div className="buttons">
-        <button onClick={() => handleDelete(plant.id)} className="button-delete">Delete</button>
-        {editingPlantId === plant.id ? (
-          <>
-            <input value={editedName} onChange={(e) => setEditedName(e.target.value)} />
-            <input value={editedType} onChange={(e) => setEditedType(e.target.value)} />
-            <button onClick={() => saveEdit(plant.id)}>Save</button>
-            <button onClick={() => setEditingPlantId(null)}>Cancel</button>
-          </>
-        ) : (
-          <button
-            onClick={() => {
-              setEditingPlantId(plant.id);
-              setEditedName(plant.name);
-              setEditedType(plant.type);
-            }}
-            className="button-edit"
-          >
-            Edit
-          </button>
-        )}
-      </div>
-    </li>
-  ))}
-</ul>
-
-
+                    {plants.map((plant) => (
+                        <li key={plant.id} className={`plant-card ${getStatusClass(plant.status)}`}>
+                        <strong>{plant.name}</strong> - {plant.type}
+                        <div>Status: <b>{plant.status}</b></div>
+                        <small>
+                            Last Update:{" "}
+                            {plant.lastUpdated
+                            ? new Date(plant.lastUpdated.seconds * 1000).toLocaleString()
+                            : "N/A"}
+                        </small>
+                        <div className="buttons">
+                            <button onClick={() => handleDelete(plant.id)} className="button-delete">Delete</button>
+                            {editingPlantId === plant.id ? (
+                            <>
+                                <input value={editedName} onChange={(e) => setEditedName(e.target.value)} />
+                                <input value={editedType} onChange={(e) => setEditedType(e.target.value)} />
+                                <button onClick={() => saveEdit(plant.id)}>Save</button>
+                                <button onClick={() => setEditingPlantId(null)}>Cancel</button>
+                            </>
+                            ) : (
+                            <button
+                                onClick={() => {
+                                setEditingPlantId(plant.id);
+                                setEditedName(plant.name);
+                                setEditedType(plant.type);
+                                }}
+                                className="button-edit"
+                            >
+                                Edit
+                            </button>
+                            )}
+                        </div>
+                        </li>
+                    ))}
+                </ul>
             }
         </div>
     );

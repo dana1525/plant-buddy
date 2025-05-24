@@ -3,7 +3,7 @@ import { db } from "../firebase/config";
 
 export const addPlant = async(userId, name, type, status) => {
     const docRef = await addDoc(collection(db, "plants"), {
-        userId, name, type, status, createdAt: Timestamp.now(), sonsors: null, lastUpdated: Timestamp.now()
+        userId, name, type, status, createdAt: Timestamp.now(), sensors: null, lastUpdated: Timestamp.now()
     });
     return docRef.id;
 };

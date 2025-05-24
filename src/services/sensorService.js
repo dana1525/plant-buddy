@@ -27,7 +27,7 @@ const generateSensorValues = (plantType) => {
 
     return {
         soilMoisture: getRandomValue(ranges.soilMoisture.min, ranges.soilMoisture.max),
-        temperature:  getRandomValue(ranges.soilMoisture.min, ranges.soilMoisture.max),
+        temperature:  getRandomValue(ranges.temperature.min, ranges.temperature.max),
         lightLevel:   getRandomValue(ranges.lightLevel.min,   ranges.lightLevel.max)
     };
 };
