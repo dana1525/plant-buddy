@@ -1,4 +1,4 @@
-import { getPlantsByUser, updatePlantSensorData } from "./plantService";
+import { getPlantsByUser, logPlantStatus, updatePlantSensorData } from "./plantService";
 
 const SIMULATION_RANGES = {
     soilMoisture: {min: 10,  max: 90,    unit: "%"  },
@@ -112,6 +112,8 @@ export const updateAllPlantSensors = async(userId) => {
 
         const status = determineStatus(sensorValues, plant.type);
         await updatePlantSensorData(plant.id, sensorValues, status);
+
+        await logPlantStatus(plant.id, sensorValues, status);
 
         return {id: plant.id, sensorValues, status};
     });

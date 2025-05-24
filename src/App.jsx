@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard'
 import RegisterForm from './components/RegisterForm'
 import Navbar from './components/Navbar'
 import PrivateRoute from './components/PrivateRoute';
+import { ToastContainer } from 'react-toastify'
 
 function App() {
   return(
@@ -20,6 +21,7 @@ function App() {
       </PrivateRoute>
     } />
   </Routes>
+  <ToastContainer />
     </>
   );
 }

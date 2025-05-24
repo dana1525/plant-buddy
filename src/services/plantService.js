@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, deleteDoc, doc, query, where, Timestamp, updateDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, query, where, Timestamp, updateDoc, orderBy } from "firebase/firestore";
 import { db } from "../firebase/config";
 
 export const addPlant = async(userId, name, type, status) => {
@@ -18,10 +18,34 @@ export const deletePlant = async(id) => {
     await deleteDoc(doc(db, "plants", id));
 };
 
+export const editPlant = async(id, updatedData) => {
+    await updateDoc(doc(db, "plants", id), {
+        ...updatedData,
+        lastUpdated: Timestamp.now()});
+};
+
 export const updatePlantSensorData = async(plantId, sensorData, status) => {
     await updateDoc(doc(db, "plants", plantId), {
         sensors: sensorData,
         status: status,
-        lastUpdated: Timestamp.now() //SAU updatedAt: new Date()
+        lastUpdated: Timestamp.now()
     });
 };
+
+//salvare stare curenta a plantei intr-un log istoric
+export const logPlantStatus = async(plantId, sensorData, status) => {
+    const logsRef = collection(db, "plants", plantId, "logs");
+    await addDoc(logsRef, {
+        status,
+        sensorData,
+        timestamp: Timestamp.now()
+    })
+}
+
+export const getPlantLogs = async(plantId) => {
+    const logsRef = collection(db, "plants", plantId, "logs");
+    // const q = query(logsRef, orderBy("timestamp"));
+    const snapshot = await getDocs(logsRef);
+    // return snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+    return snapshotEqual.docs.map(doc => doc.data());
+}
