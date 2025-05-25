@@ -27,23 +27,27 @@ const generateSensorValues = (plantType) => {
 
     return {
         soilMoisture: getRandomValue(ranges.soilMoisture.min, ranges.soilMoisture.max),
-        temperature:  getRandomValue(ranges.temperature.min, ranges.temperature.max),
+        temperature:  getRandomValue(ranges.temperature.min,  ranges.temperature.max),
         lightLevel:   getRandomValue(ranges.lightLevel.min,   ranges.lightLevel.max)
     };
 };
 
 const simulateChangesOverTime = (currentValues) => {
-    const soilMoistureChange = getRandomValue(-3, 0); //less humidity over time
+    // 20% sansa ca planta sa fie udata (crestere intre 10-30%)
+    const isWatered = Math.random() < 0.2;
+    
+    const soilMoistureChange = isWatered ? getRandomValue(10, 30) : getRandomValue(-3, 0);  // crestere semnificativa sau scadere normala
+
     const temperatureChange  = getRandomValue(-1, 1);
     const lightLevelChange   = getRandomValue(-200, 200);
 
     return {
         soilMoisture: Math.max(SIMULATION_RANGES.soilMoisture.min,
-                                Math.min(currentValues.soilMoisture + soilMoistureChange, SIMULATION_RANGES.soilMoisture.max)),
+            Math.min(currentValues.soilMoisture + soilMoistureChange, SIMULATION_RANGES.soilMoisture.max)),
         temperature: Math.max(SIMULATION_RANGES.temperature.min,
-                                Math.min(currentValues.temperature + temperatureChange, SIMULATION_RANGES.temperature.max)),
+            Math.min(currentValues.temperature + temperatureChange, SIMULATION_RANGES.temperature.max)),
         lightLevel: Math.max(SIMULATION_RANGES.lightLevel.min,
-                                Math.min(currentValues.lightLevel + lightLevelChange, SIMULATION_RANGES.lightLevel.max))
+            Math.min(currentValues.lightLevel + lightLevelChange, SIMULATION_RANGES.lightLevel.max))
     };
 };
 

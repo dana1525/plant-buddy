@@ -1,5 +1,3 @@
-// import { logout } from "../services/authService";
-// import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getPlantsByUser } from "../services/plantService";
 import { deletePlant } from "../services/plantService";
@@ -13,13 +11,12 @@ import { editPlant } from "../services/plantService";
 import { onAuthStateChanged } from "firebase/auth";
 
 export default function Dashboard(){
-    // const navigate = useNavigate();
-    
     const [plants, setPlants] = useState([]);
 
     const [editingPlantId, setEditingPlantId] = useState(null);
     const [editedName, setEditedName] = useState("");
     const [editedType, setEditedType] = useState("");
+    const [selectedPlantForChart, setSelectedPlantForChart] = useState(null);
 
     const getStatusClass = (status) => {
         switch(status){
@@ -50,6 +47,9 @@ export default function Dashboard(){
 
     const handleDelete = async(id) => {
         await deletePlant(id);
+        if (selectedPlantForChart === id) {
+        setSelectedPlantForChart(null);
+        }
         fetchPlants();
         toast.success("Plant deleted!", {
             style: {
@@ -72,13 +72,17 @@ export default function Dashboard(){
         });
     };
 
+    const showChart = (plantId) => {
+        setSelectedPlantForChart(selectedPlantForChart === plantId ? null : plantId);
+    };
+
     useEffect(() => {
        const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
             updateAllPlantSensors(user.uid);
             const interval = setInterval(() => {
                 updateAllPlantSensors(user.uid);
-            }, 2000);
+            }, 60000);
 
             return () => clearInterval(interval);
         }
@@ -90,45 +94,68 @@ export default function Dashboard(){
         <div>
             <h2>Your Plants 🌱</h2>
             <AddPlantForm onPlantAdded={fetchPlants} />
+
             {plants.length === 0 ?
                 (<p>No plants yet! Add one above!</p>) : 
-                <ul className="plant-list">
+                (<ul className="plant-list">
                     {plants.map((plant) => (
                         <li key={plant.id} className={`plant-card ${getStatusClass(plant.status)}`}>
-                        <strong>{plant.name}</strong> - {plant.type}
-                        <div>Status: <b>{plant.status}</b></div>
-                        <small>
-                            Last Update:{" "}
-                            {plant.lastUpdated
-                            ? new Date(plant.lastUpdated.seconds * 1000).toLocaleString()
-                            : "N/A"}
-                        </small>
+                            <div className="plant-header">
+                                <strong>{plant.name}</strong> - {plant.type}
+                                <div>Status: <b>{plant.status}</b></div>
+                                {/* afisare date senzori */}
+                                {plant.sensors && (
+                                    <div className="sensor-data">
+                                        <small>
+                                            🌡️ {plant.sensors.temperature}°C | 
+                                            💧 {plant.sensors.soilMoisture}% | 
+                                            ☀️ {plant.sensors.lightLevel} lux
+                                        </small>
+                                    </div>
+                                )}
+
+                                <small>
+                                    Last Update:{" "}
+                                    {plant.lastUpdated
+                                    ? new Date(plant.lastUpdated.seconds * 1000).toLocaleString()
+                                    : "N/A"}
+                                </small>
+                            </div>
+
                         <div className="buttons">
-                            <button onClick={() => handleDelete(plant.id)} className="button-delete">Delete</button>
-                            {editingPlantId === plant.id ? (
-                            <>
-                                <input value={editedName} onChange={(e) => setEditedName(e.target.value)} />
-                                <input value={editedType} onChange={(e) => setEditedType(e.target.value)} />
-                                <button onClick={() => saveEdit(plant.id)}>Save</button>
-                                <button onClick={() => setEditingPlantId(null)}>Cancel</button>
-                            </>
-                            ) : (
-                            <button
-                                onClick={() => {
-                                setEditingPlantId(plant.id);
-                                setEditedName(plant.name);
-                                setEditedType(plant.type);
-                                }}
-                                className="button-edit"
-                            >
-                                Edit
-                            </button>
+                                <button onClick={() => showChart(plant.id)} className="button-chart">
+                                    {selectedPlantForChart === plant.id ? 'Hide Chart' : 'Show Chart'}
+                                </button>
+                                
+                                <button onClick={() => handleDelete(plant.id)} className="button-delete">Delete</button>
+                                
+                                {editingPlantId === plant.id ? (
+                                    <>
+                                        <input value={editedName} onChange={(e) => setEditedName(e.target.value)} placeholder="Plant name"/>
+                                        <input value={editedType} onChange={(e) => setEditedType(e.target.value)} placeholder="Plant type"/>
+                                        <button onClick={() => saveEdit(plant.id)}>Save</button>
+                                        <button onClick={() => setEditingPlantId(null)}>Cancel</button>
+                                    </>
+                                ) : (
+                                    <button onClick={() => {setEditingPlantId(plant.id); setEditedName(plant.name); setEditedType(plant.type);}}
+                                        className="button-edit">
+                                        Edit
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {/* afisare grafic daca este selectat */}
+                            {selectedPlantForChart === plant.id && (
+                                <div className="chart-container">
+                                    <PlantChart plantId={plant.id} />
+                                </div>
                             )}
-                        </div>
                         </li>
                     ))}
                 </ul>
-            }
+            )}
+            
+            <ToastContainer />
         </div>
     );
 }
