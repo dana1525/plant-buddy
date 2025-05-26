@@ -32,6 +32,7 @@ export const updatePlantSensorData = async(plantId, sensorData, status) => {
         lastUpdated: Timestamp.now()
     });
     await logPlantStatus(plantId, sensorData, status);
+    await pruneLogs(plantId, 100);
 };
 
 //salvare stare curenta a plantei intr-un log istoric
@@ -55,4 +56,21 @@ export const getPlantLogs = async (plantId) => {
   const snapshot = await getDocs(logsQuery);
   const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   return logs;
+};
+
+export const pruneLogs = async (plantId, maxLogs = 50) => {
+  const logsRef = collection(db, "plants", plantId, "logs");
+
+  // toate logurile, ordonate descrescator dupa timestamp
+  const logsQuery = query(logsRef, orderBy("timestamp", "desc"));
+  const logsSnapshot = await getDocs(logsQuery);
+
+  // daca sunt prea multe loguri, le sterg pe cele mai vechi
+  const logs = logsSnapshot.docs;
+  if (logs.length > maxLogs) {
+    const logsToDelete = logs.slice(maxLogs); // cele mai vechi
+    for (const log of logsToDelete) {
+      await deleteDoc(doc(db, "plants", plantId, "logs", log.id));
+    }
+  }
 };

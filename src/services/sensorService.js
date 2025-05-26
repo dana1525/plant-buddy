@@ -34,9 +34,9 @@ const generateSensorValues = (plantType) => {
 
 const simulateChangesOverTime = (currentValues) => {
     // 20% sansa ca planta sa fie udata (crestere intre 10-30%)
-    const isWatered = Math.random() < 0.2;
-    
-    const soilMoistureChange = isWatered ? getRandomValue(10, 30) : getRandomValue(-3, 0);  // crestere semnificativa sau scadere normala
+    const isWatered = Math.random() < 0.2 && currentValues.soilMoisture < 60;
+
+    const soilMoistureChange = isWatered ? getRandomValue(5, 15) : getRandomValue(-4, -1); // scade mai rapid, urca mai lent
 
     const temperatureChange  = getRandomValue(-1, 1);
     const lightLevelChange   = getRandomValue(-200, 200);
@@ -118,6 +118,7 @@ export const updateAllPlantSensors = async(userId) => {
         await updatePlantSensorData(plant.id, sensorValues, status);
 
         await logPlantStatus(plant.id, sensorValues, status);
+        await pruneLogs(plant.id, 100);
 
         return {id: plant.id, sensorValues, status};
     });

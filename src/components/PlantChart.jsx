@@ -13,20 +13,29 @@ export default function PlantChart({ plantId }){
         setLoading(true); // ca sa se reseteze daca schimb planta
         const data = await getPlantLogs(plantId);
         const formatted = data.map(log => {
-                const sensors = log.sensors || log.sensorData || {};
-                
-                return {
-                    time: new Date(log.timestamp.seconds * 1000).toLocaleTimeString(),
-                    fullDate: new Date(log.timestamp.seconds * 1000),
-                    soilMoisture: sensors.soilMoisture || 0,
-                    temperature: sensors.temperature || 0,
-                    lightLevel: sensors.lightLevel || 0,
-                    status: log.status || "Unknown"
-                };
-            }).filter(log => 
-                // eliminare date cu valori de 0
-                log.soilMoisture > 0 || log.temperature > 0 || log.lightLevel > 0
-            );
+            const sensors = log.sensors || log.sensorData || {};
+            const dateObj = new Date(log.timestamp.seconds * 1000);
+
+            // format zi + ora fara secunde
+            const timeString = dateObj.toLocaleString("ro-RO", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            });
+
+            return {
+                time: timeString,
+                fullDate: dateObj,
+                soilMoisture: sensors.soilMoisture || 0,
+                temperature: sensors.temperature || 0,
+                lightLevel: sensors.lightLevel || 0,
+                status: log.status || "Unknown"
+            };
+});
+
         setLogs(formatted);
         setLoading(false);
         };
@@ -85,7 +94,7 @@ export default function PlantChart({ plantId }){
     if(!logs.length) return <div className="p-4">No chart data available.</div>
 
     return(
-        <div className="w-full">
+        <div className="w-full min-h-[500px] max-w-5xl mx-auto">
             <div className="mb-4 flex gap-2">
                 <button onClick = {() => setTimeRange('week')}
                         className = {`px-3 py-1 rounded ${timeRange === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>Last week</button>
@@ -99,7 +108,7 @@ export default function PlantChart({ plantId }){
                 <p className="text-sm text-gray-600"> {filteredLogs.length} / {logs.length} records</p>
             </div>
 
-            <ResponsiveContainer width="100%" height={400}>
+            <ResponsiveContainer width={1000} height={400}>
                 <LineChart data={filteredLogs} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                     <XAxis dataKey="time" tick={{ fontSize: 12 }} angle={-45} textAnchor="end" height={80}/>
@@ -114,18 +123,4 @@ export default function PlantChart({ plantId }){
         </div>
 
     );
-
-    // function getStatusColor(status){
-    //     ///// MAYBE CHANGE COLORS ///////
-    //     switch(status){
-    //         case "Healthy": return "bg-green-200 text-green-800";
-    //         case "Needs Water": return "bg-yellow-200 text-yellow-800";
-    //         case "Overwatered": return "bg-blue-200 text-blue-800";
-    //         case "Too Cold":
-    //         case "Too Hot": return "bg-red-200 text-red-800";
-    //         case "Needs More Light":
-    //         case "Too Much Light": return "bg-orange-200 text-orange-800";
-    //         default: return "bg-gray-200 text-gray-800";
-    //     }
-    // }
 }

@@ -10,13 +10,13 @@ import PlantChart from "./PlantChart";
 import { editPlant } from "../services/plantService";
 import { onAuthStateChanged } from "firebase/auth";
 
-export default function Dashboard(){
+export default function Dashboard() {
     const [plants, setPlants] = useState([]);
-
     const [editingPlantId, setEditingPlantId] = useState(null);
     const [editedName, setEditedName] = useState("");
     const [editedType, setEditedType] = useState("");
     const [selectedPlantForChart, setSelectedPlantForChart] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
     const getStatusClass = (status) => {
         switch(status){
@@ -48,7 +48,7 @@ export default function Dashboard(){
     const handleDelete = async(id) => {
         await deletePlant(id);
         if (selectedPlantForChart === id) {
-        setSelectedPlantForChart(null);
+            setSelectedPlantForChart(null);
         }
         fetchPlants();
         toast.success("Plant deleted!", {
@@ -73,7 +73,13 @@ export default function Dashboard(){
     };
 
     const showChart = (plantId) => {
-        setSelectedPlantForChart(selectedPlantForChart === plantId ? null : plantId);
+        setSelectedPlantForChart(plantId);
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setSelectedPlantForChart(null);
     };
 
     useEffect(() => {
@@ -102,7 +108,7 @@ export default function Dashboard(){
                         <li key={plant.id} className={`plant-card ${getStatusClass(plant.status)}`}>
                             <div className="plant-header">
                                 <strong>{plant.name}</strong> - {plant.type}
-                                <div>Status: <b>{plant.status}</b></div>
+                                <div><b>{plant.status}</b></div>
                                 {/* afisare date senzori */}
                                 {plant.sensors && (
                                     <div className="sensor-data">
@@ -123,36 +129,64 @@ export default function Dashboard(){
                             </div>
 
                         <div className="buttons">
-                                <button onClick={() => showChart(plant.id)} className="button-chart">
-                                    {selectedPlantForChart === plant.id ? 'Hide Chart' : 'Show Chart'}
-                                </button>
-                                
-                                <button onClick={() => handleDelete(plant.id)} className="button-delete">Delete</button>
-                                
-                                {editingPlantId === plant.id ? (
-                                    <>
-                                        <input value={editedName} onChange={(e) => setEditedName(e.target.value)} placeholder="Plant name"/>
-                                        <input value={editedType} onChange={(e) => setEditedType(e.target.value)} placeholder="Plant type"/>
-                                        <button onClick={() => saveEdit(plant.id)}>Save</button>
-                                        <button onClick={() => setEditingPlantId(null)}>Cancel</button>
-                                    </>
-                                ) : (
-                                    <button onClick={() => {setEditingPlantId(plant.id); setEditedName(plant.name); setEditedType(plant.type);}}
-                                        className="button-edit">
-                                        Edit
-                                    </button>
-                                )}
-                            </div>
+                            <button 
+                                onClick={() => showChart(plant.id)} 
+                                className="button-chart"
+                            >
+                                Show Chart
+                            </button>
                             
-                            {/* afisare grafic daca este selectat */}
-                            {selectedPlantForChart === plant.id && (
-                                <div className="chart-container">
-                                    <PlantChart plantId={plant.id} />
-                                </div>
+                            <button onClick={() => handleDelete(plant.id)} className="button-delete">Delete</button>
+                            
+                            {editingPlantId === plant.id ? (
+                                <>
+                                    <input value={editedName} onChange={(e) => setEditedName(e.target.value)} placeholder="Plant name"/>
+                                    <input value={editedType} onChange={(e) => setEditedType(e.target.value)} placeholder="Plant type"/>
+                                    <button onClick={() => saveEdit(plant.id)}>Save</button>
+                                    <button onClick={() => setEditingPlantId(null)}>Cancel</button>
+                                </>
+                            ) : (
+                                <button onClick={() => {setEditingPlantId(plant.id); setEditedName(plant.name); setEditedType(plant.type);}}
+                                    className="button-edit">
+                                    Edit
+                                </button>
                             )}
+                        </div>
                         </li>
                     ))}
                 </ul>
+            )}
+            
+            {showModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    backdropFilter: 'blur(4px)',
+                    zIndex: 100,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '1rem'
+                }}>
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-85 backdrop-blur-sm">
+                    <div className="relative w-full max-w-6xl bg-gray-800 rounded-xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto border border-gray-600">
+                        <button 
+                            onClick={closeModal}
+                            className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-700 transition-colors"
+                            aria-label="Close chart"
+                        >X</button>
+                        
+                        <h3 className="text-2xl font-bold mb-6 text-white">
+                            {plants.find(p => p.id === selectedPlantForChart)?.name} - Sensor Data
+                        </h3>
+                        
+                        <div className="mt-4">
+                            <PlantChart plantId={selectedPlantForChart} />
+                        </div>
+                    </div>
+                </div>
+                </div>
             )}
             
             <ToastContainer />
