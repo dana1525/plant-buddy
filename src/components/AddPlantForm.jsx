@@ -7,28 +7,39 @@ import { initializePlantSensors } from "../services/sensorService";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+/**
+ * AddPlantForm Component - handles adding new plants to user's collection
+ * Creates plant record, initializes sensors, and provides user feedback
+ * @param {Function} onPlantAdded - callback function to notify parent component of new plant
+ */
+
 export default function AddPlantForm({ onPlantAdded }){
     const [name, setName] = useState("");
     const [type, setType] = useState("");
     const [status, setStatus] = useState("");
 
+
+    /**
+     * Handles form submission and plant creation process
+     * Creates plant record, initializes sensor data, resets form, and shows success notification
+     * @param {Event} e - form submit event
+     */
     const handleSubmit = async(e) => {
         e.preventDefault();
         const user = auth.currentUser;
         if(!user) return;
 
-        // const plantDoc = await addDoc(collection(db, "plants"), {
-        //     userId: user.uid, name, type, createdAt: new Date()
-        // });
-    
         const plantId = await addPlant(user.uid, name, type, status);
         
         await initializePlantSensors(plantId, type);
+
+        // Reset form fields after successful submission
         setName("");
         setType("");
         setStatus("");
-        if(onPlantAdded) onPlantAdded(); //notify dashboard
+        if(onPlantAdded) onPlantAdded(); // Notify dashboard
 
+        // Show success notification to user
         toast.success("New plant added!", {
             style: {
                 background: "#1a1a1a"

@@ -10,6 +10,13 @@ import PlantChart from "./PlantChart";
 import { editPlant } from "../services/plantService";
 import { onAuthStateChanged } from "firebase/auth";
 
+/**
+ * Dashboard Component - main interface for plant management
+ * Allows users to view, edit, delete, and monitor their plants
+ * Integrates with Firebase Auth and displays sensor data per plant
+ * Provides chart visualization and periodic sensor updates
+ */
+
 export default function Dashboard() {
     const [plants, setPlants] = useState([]);
     const [editingPlantId, setEditingPlantId] = useState(null);
@@ -18,6 +25,10 @@ export default function Dashboard() {
     const [selectedPlantForChart, setSelectedPlantForChart] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
+    /**
+     * Maps plant status to CSS class for styling
+     * @param {string} status - plant health/status
+     */
     const getStatusClass = (status) => {
         switch(status){
             case "Needs Water":
@@ -34,17 +45,25 @@ export default function Dashboard() {
         }
     };
 
+    /**
+     * Fetches all plants associated with the current user
+     */
     const fetchPlants = async() => {
         const user = auth.currentUser;
         if(!user) return;
         const data = await getPlantsByUser(user.uid);
         setPlants(data);
-    };
+        };
 
-    useEffect(() => {
-        fetchPlants();
-    }, []);
+        // Initial fetch of user's plants
+        useEffect(() => {
+            fetchPlants();
+        }, []);
 
+    /**
+     * Deletes a plant by ID and refreshes the list
+     * @param {string} id - plant ID to delete
+     */
     const handleDelete = async(id) => {
         await deletePlant(id);
         if (selectedPlantForChart === id) {
@@ -58,6 +77,10 @@ export default function Dashboard() {
         });
     };
 
+    /**
+     * Saves edited plant name and type
+     * @param {string} id - plant ID to edit
+     */
     const saveEdit = async(id) => {
         await editPlant(id, {
             name: editedName,
@@ -72,16 +95,26 @@ export default function Dashboard() {
         });
     };
 
+    /**
+     * Opens modal to show chart for selected plant
+     * @param {string} plantId - plant to display chart for
+     */
     const showChart = (plantId) => {
         setSelectedPlantForChart(plantId);
         setShowModal(true);
     };
 
+    /**
+     * Closes the chart modal
+     */
     const closeModal = () => {
         setShowModal(false);
         setSelectedPlantForChart(null);
     };
 
+    /**
+     * Starts interval to update sensors when user is authenticated
+     */
     useEffect(() => {
        const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -157,6 +190,7 @@ export default function Dashboard() {
                 </ul>
             )}
             
+            {/* Modal for plant chart */}
             {showModal && (
                 <div style={{
                     position: 'fixed',
@@ -189,6 +223,7 @@ export default function Dashboard() {
                 </div>
             )}
             
+            {/* Toast messages container */}
             <ToastContainer />
         </div>
     );

@@ -1,7 +1,14 @@
+/**
+ * Firebase Configuration and Initialization
+ * Sets up Firebase App with environment-specific variables
+ * Exports initialized Firebase Auth and Firestore services
+ */
+
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
+// Firebase configuration object using environment variables
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -12,7 +19,9 @@ const firebaseConfig = {
     
   };
 
+// Initialize Firebase app
 const app = initializeApp(firebaseConfig);
 
+// Export Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);

@@ -2,21 +2,31 @@ import { useEffect, useState } from "react";
 import { getPlantLogs } from "../services/plantService";
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 
+/**
+ * PlantChart Component - displays sensor data for a specific plant
+ * Fetches and visualizes logs like temperature, humidity, and light over time
+ * Allows filtering data by week, month, or all available logs
+ */
+
 export default function PlantChart({ plantId }){
     const [logs, setLogs] = useState([]);
     const [filteredLogs, setFilteredLogs] = useState([]);
     const [timeRange, setTimeRange] = useState('week'); // 'week', 'month', 'all'
     const [loading, setLoading] = useState(true);
 
+    /**
+     * Fetches logs for the given plant and formats data for chart display
+     * Runs when plantId changes
+     */
     useEffect(() => {
     const fetchLogs = async () => {
-        setLoading(true); // ca sa se reseteze daca schimb planta
+        setLoading(true); // Reset loading on plant change
         const data = await getPlantLogs(plantId);
         const formatted = data.map(log => {
             const sensors = log.sensors || log.sensorData || {};
             const dateObj = new Date(log.timestamp.seconds * 1000);
 
-            // format zi + ora fara secunde
+            // Format timestamp as DD.MM.YYYY HH:MM
             const timeString = dateObj.toLocaleString("ro-RO", {
                 day: "2-digit",
                 month: "2-digit",
@@ -43,6 +53,10 @@ export default function PlantChart({ plantId }){
     }, [plantId]);
 
 
+    /**
+     * Filters logs based on selected time range (week, month, all)
+     * Runs when logs or timeRange changes
+     */
     useEffect(() => {
         if (logs.length === 0) return;
 
@@ -57,13 +71,18 @@ export default function PlantChart({ plantId }){
                 startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
                 break;
             default:
-                startDate = new Date(0); // toate datele
+                startDate = new Date(0); // Includ all logs
         }
 
         const filtered = logs.filter(log => log.fullDate >= startDate);
         setFilteredLogs(filtered);
     }, [logs, timeRange]);
 
+
+    /**
+     * Custom tooltip for chart points
+     * Displays time and value with appropriate units
+     */
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
@@ -80,6 +99,11 @@ export default function PlantChart({ plantId }){
         return null;
     };
 
+
+    /**
+     * Returns unit symbol based on sensor type
+     * @param {string} dataKey - sensor field name
+     */
     const getUnit = (dataKey) => {
         switch (dataKey) {
             case 'soilMoisture': return '%';
